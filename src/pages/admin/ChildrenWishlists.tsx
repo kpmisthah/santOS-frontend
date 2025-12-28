@@ -2,30 +2,49 @@ import { useState, useEffect } from 'react';
 import type { Child } from '../../types';
 
 const ChildrenWishlists = () => {
-    const [children, setChildren] = useState<Child[]>([]);
+    const [children, setChildren] = useState<any[]>([]); // Using any for flexible transformation
     const [filter, setFilter] = useState<'all' | 'nice' | 'naughty'>('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+    const [selectedChild, setSelectedChild] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate API call
-        setTimeout(() => {
-            setChildren([
-                { id: '1', name: 'Emma Johnson', age: 8, location: 'New York, USA', category: 'nice', createdAt: '2024-12-01' },
-                { id: '2', name: 'Liam Smith', age: 6, location: 'London, UK', category: 'nice', createdAt: '2024-12-02' },
-                { id: '3', name: 'Olivia Brown', age: 10, location: 'Sydney, Australia', category: 'naughty', createdAt: '2024-12-03' },
-                { id: '4', name: 'Noah Davis', age: 7, location: 'Toronto, Canada', category: 'nice', createdAt: '2024-12-04' },
-                { id: '5', name: 'Ava Wilson', age: 9, location: 'Paris, France', category: 'nice', createdAt: '2024-12-05' },
-                { id: '6', name: 'Ethan Martinez', age: 5, location: 'Berlin, Germany', category: 'naughty', createdAt: '2024-12-06' },
-                { id: '7', name: 'Sophia Garcia', age: 11, location: 'Tokyo, Japan', category: 'nice', createdAt: '2024-12-07' },
-                { id: '8', name: 'Mason Rodriguez', age: 8, location: 'Mumbai, India', category: 'nice', createdAt: '2024-12-08' },
-            ]);
-        }, 500);
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/wishlists');
+                if (response.ok) {
+                    const wishlists = await response.json();
+
+                    // Transform: The backend returns Wishlists with nested Child. 
+                    // We want to display Children.
+                    // Let's create a flat structure for the table.
+                    const transformedChildren = wishlists.map((w: any) => ({
+                        ...w.child,
+                        wishlistId: w.id,
+                        // If no items, this might be empty, but that's fine.
+                        items: w.items || [],
+                        // Parse date if needed, or keep string
+                        createdAt: w.createdAt
+                    }));
+
+                    setChildren(transformedChildren);
+                }
+            } catch (error) {
+                console.error("Failed to fetch wishlists", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+        // Poll for updates every 10s to see new submissions live!
+        const interval = setInterval(fetchData, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const filteredChildren = children.filter((child) => {
-        const matchesFilter = filter === 'all' || child.category === filter;
+        const matchesFilter = filter === 'all' || child.category === filter || (filter === 'nice' && (!child.category)); // Default to nice if undefined?
         const matchesSearch = child.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             child.location.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesFilter && matchesSearch;
@@ -37,7 +56,7 @@ const ChildrenWishlists = () => {
         naughty: children.filter(c => c.category === 'naughty').length,
     };
 
-    const viewWishlist = (child: Child) => {
+    const viewWishlist = (child: any) => {
         setSelectedChild(child);
         setIsModalOpen(true);
     };

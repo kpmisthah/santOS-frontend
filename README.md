@@ -6,8 +6,15 @@ A modern, beautiful web application built with React, TypeScript, and Tailwind C
 
 ### 🎅 Admin (Santa) Features
 - **Dashboard Overview**: Real-time statistics, metrics, and visual analytics
-- **Analytics Charts**: Visual insights on Gift Demand and Behavior (Nice/Naughty) using interactive charts
-- **Children & Wishlists Management**: View and manage children's information and gift requests
+- **Analytics Charts**: Interactive visualizations for:
+  - Top Requested Toys (Bar Chart)
+  - Nice vs Naughty Ratio (Doughnut Chart)
+  - Auto-refreshes every 30 seconds
+- **Children & Wishlists Management**: 
+  - View all submitted wishlists in real-time
+  - Filter by Nice/Naughty status
+  - Search by name or location
+  - View detailed wishlist items with priorities
 - **Task Assignment**: Assign gift production tasks to elves
 - **Delivery Tracking**: Monitor deliveries across all regions worldwide
 
@@ -16,6 +23,13 @@ A modern, beautiful web application built with React, TypeScript, and Tailwind C
 - **Task Management**: View and update assigned tasks
 - **Progress Tracking**: Update task progress with notes
 - **Achievements**: Earn badges for outstanding performance
+
+### 👶 Public Features
+- **Wishlist Submission**: Children can submit their Christmas wishlists
+  - Enter name, age, and location
+  - Add multiple gift items with priorities (High/Medium/Low)
+  - Receive tracking code upon submission
+  - Beautiful, festive UI with smooth animations
 
 ## 🚀 Tech Stack
 
@@ -37,6 +51,8 @@ npm install
 npm run dev
 ```
 
+**Note**: Make sure the backend server is running on `http://localhost:3000` for full functionality.
+
 ## 🎨 Design Features
 
 - **Modern Dark Theme**: Eye-catching dark mode with Christmas colors
@@ -44,24 +60,30 @@ npm run dev
 - **Smooth Animations**: Micro-interactions and transitions
 - **Responsive Design**: Works perfectly on all devices
 - **Accessibility**: Semantic HTML and proper ARIA labels
+- **Loading States**: Elegant loading spinners and error handling
+- **Real-time Updates**: Dashboard auto-refreshes to show latest data
 
 ## 🎯 Pages
 
 ### Authentication
 - `/` - Login page with role selection (Santa/Elf)
+  - Secure authentication with backend validation
+  - Role-based access control
+  - Persistent sessions using Zustand
 
-### Admin Routes
+### Admin Routes (Protected)
 - `/admin/dashboard` - Admin dashboard with statistics and charts
-- `/admin/children` - Children and wishlists management
+- `/admin/children` - Children and wishlists management (real-time data)
 - `/admin/tasks` - Task assignment and management
 - `/admin/deliveries` - Delivery tracking
 
-### Worker Routes
+### Worker Routes (Protected)
 - `/worker/dashboard` - Worker dashboard with personal stats
 - `/worker/tasks` - Task management and progress updates
 
-### User Routes
+### User Routes (Public)
 - `/user/wishlist` - Public wishlist submission form for children
+- `/user/track` - Track gift delivery status
 
 ## 🎨 Color Palette
 
@@ -78,16 +100,23 @@ frontend/
 ├── src/
 │   ├── pages/
 │   │   ├── admin/
-│   │   │   ├── AdminDashboard.tsx
-│   │   │   ├── ChildrenWishlists.tsx
+│   │   │   ├── AdminDashboard.tsx      # Real-time analytics dashboard
+│   │   │   ├── ChildrenWishlists.tsx   # Wishlist management
 │   │   │   ├── TaskAssignment.tsx
 │   │   │   └── DeliveryTracking.tsx
 │   │   ├── worker/
 │   │   │   ├── WorkerDashboard.tsx
 │   │   │   └── WorkerTasks.tsx
-│   │   └── Login.tsx
+│   │   ├── user/
+│   │   │   ├── Wishlist.tsx            # Public wishlist form
+│   │   │   └── TrackGift.tsx
+│   │   └── Login.tsx                   # Authentication page
 │   ├── layouts/
-│   │   └── Layout.tsx
+│   │   └── Layout.tsx                  # Main layout with navigation
+│   ├── components/
+│   │   └── ProtectedRoute.tsx          # Route protection HOC
+│   ├── store/
+│   │   └── authStore.ts                # Zustand auth state
 │   ├── types/
 │   │   └── index.ts
 │   ├── App.tsx
@@ -114,12 +143,16 @@ npm run preview
 ## 📝 Demo Credentials
 
 ### Admin (Santa)
-- Email: santa@northpole.com
-- Password: (any password)
+- Email: `santa@northpole.com`
+- Password: `hohoho`
+- Role: Admin
 
 ### Worker (Elf)
-- Email: elf@workshop.com
-- Password: (any password)
+- Email: `elf@workshop.com`
+- Password: `hohoho`
+- Role: Worker
+
+**Note**: These credentials are seeded in the database. Make sure to run `npx prisma db seed` in the backend first.
 
 ## 📸 Screenshots
 
@@ -128,11 +161,18 @@ npm run preview
 ## 🎄 Future Enhancements
 
 - [x] Backend API integration with Node.js
-- [x] Advanced analytics and reporting
-- [ ] Real-time updates with WebSockets
-- [ ] Email notifications
-- [ ] Mobile app version
-- [ ] Multi-language support
+- [x] Advanced analytics and reporting with Chart.js
+- [x] Authentication and authorization with Zustand
+- [x] Route protection and role-based access
+- [x] Public wishlist submission form
+- [x] Real-time data updates
+- [ ] WebSocket integration for instant updates
+- [ ] Email notifications for wishlist confirmations
+- [ ] Mobile app version (React Native)
+- [ ] Multi-language support (i18n)
+- [ ] Gift tracking with real-time status
+- [ ] Admin approval workflow for wishlists
+- [ ] Task automation and assignment logic
 
 ## 👨‍💻 Author
 
