@@ -45,37 +45,41 @@ const AdminDashboard = () => {
     });
 
     const [demandData, setDemandData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 // Fetch Stats
                 const statsRes = await fetch('http://localhost:3000/api/analytics/stats');
-                if (statsRes.ok) {
-                    const data = await statsRes.json();
-                    setStats(data);
-                }
+                if (!statsRes.ok) throw new Error('Failed to fetch stats');
+                const data = await statsRes.json();
+                setStats(data);
 
                 // Fetch Demand for Charts
                 const demandRes = await fetch('http://localhost:3000/api/analytics/demand');
-                if (demandRes.ok) {
-                    const data = await demandRes.json();
+                if (!demandRes.ok) throw new Error('Failed to fetch demand data');
+                const demandData = await demandRes.json();
 
-                    // Process global demand for bar chart (Top 5)
-                    const topGifts = data.global_demand.slice(0, 5);
-                    setDemandData({
-                        labels: topGifts.map((d: any) => d.gift_name),
-                        datasets: [
-                            {
-                                label: 'Requested Qty',
-                                data: topGifts.map((d: any) => d.count),
-                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                            }
-                        ]
-                    });
-                }
-            } catch (error) {
+                // Process global demand for bar chart (Top 5)
+                const topGifts = demandData.global_demand.slice(0, 5);
+                setDemandData({
+                    labels: topGifts.map((d: any) => d.gift_name),
+                    datasets: [
+                        {
+                            label: 'Requested Qty',
+                            data: topGifts.map((d: any) => d.count),
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        }
+                    ]
+                });
+                setError(null);
+            } catch (error: any) {
                 console.error("Failed to fetch dashboard data", error);
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -83,6 +87,34 @@ const AdminDashboard = () => {
         const interval = setInterval(fetchData, 30000); // Poll every 30s
         return () => clearInterval(interval);
     }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-stardust-400 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-frost-200 animate-pulse">Loading North Pole Analytics...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="text-center p-8 bg-festive-red-900/20 border border-festive-red-500/50 rounded-2xl">
+                    <h3 className="text-2xl font-bold text-festive-red-400 mb-2">System Error</h3>
+                    <p className="text-frost-200/80 mb-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-festive-red-600 hover:bg-festive-red-500 text-white rounded-lg transition-colors"
+                    >
+                        Retry Connection
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     const statCards = [
         {
