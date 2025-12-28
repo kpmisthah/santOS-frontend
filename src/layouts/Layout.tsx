@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 interface LayoutProps {
     children: ReactNode;
@@ -16,6 +17,7 @@ const Layout = ({ children, role }: LayoutProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { user, logout } = useAuthStore();
 
     const adminNavItems: NavItem[] = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
@@ -32,7 +34,7 @@ const Layout = ({ children, role }: LayoutProps) => {
     const navItems = role === 'admin' ? adminNavItems : workerNavItems;
 
     const handleLogout = () => {
-        // Clear auth data
+        logout();
         navigate('/');
     };
 
@@ -85,10 +87,10 @@ const Layout = ({ children, role }: LayoutProps) => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-display font-bold text-white truncate text-lg shadow-sm">
-                                {role === 'admin' ? 'Santa Claus' : 'Elf Worker'}
+                                {user?.name || (role === 'admin' ? 'Santa Claus' : 'Elf Worker')}
                             </p>
                             <p className="text-xs text-stardust-400/80 font-mono truncate">
-                                {role === 'admin' ? 'santa@northpole.com' : 'elf@workshop.com'}
+                                {user?.email || (role === 'admin' ? 'santa@northpole.com' : 'elf@workshop.com')}
                             </p>
                         </div>
                     </div>

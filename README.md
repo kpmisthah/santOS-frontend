@@ -21,6 +21,7 @@ A modern, beautiful web application built with React, TypeScript, and Tailwind C
 
 - **Frontend**: React 18 + TypeScript
 - **Styling**: Tailwind CSS
+- **State Management**: Zustand
 - **Visualization**: Chart.js + react-chartjs-2
 - **Routing**: React Router v6
 - **Build Tool**: Vite

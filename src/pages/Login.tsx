@@ -2,9 +2,11 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { LoginCredentials } from '../types';
+import { useAuthStore } from '../store/authStore';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuthStore();
     const [formData, setFormData] = useState<LoginCredentials>({
         email: '',
         password: '',
@@ -13,20 +15,42 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError(null);
 
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Login failed');
+            }
+
+            // Store user info via Zustand
+            login(data.user);
+
             // Navigate based on role
-            if (formData.role === 'admin') {
+            if (data.user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else {
                 navigate('/worker/dashboard');
             }
-        }, 1500);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -93,6 +117,13 @@ const Login = () => {
                         <span className="text-xs font-bold text-north-pole-400 uppercase tracking-widest">Credentials</span>
                         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                     </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-6 p-3 bg-festive-red-500/20 border border-festive-red-500 rounded-lg text-festive-red-300 text-sm text-center">
+                            {error}
+                        </div>
+                    )}
 
                     {/* Login Form */}
                     <form onSubmit={handleSubmit} className="space-y-5">
