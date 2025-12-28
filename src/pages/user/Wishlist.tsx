@@ -38,16 +38,53 @@ const Wishlist = () => {
         setWishes(wishes.filter(wish => wish.id !== id));
     };
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (childName && age && wishes.length > 0) {
-            // Generate a tracking code
-            const code = `SANTA-${Date.now().toString(36).toUpperCase()}`;
-            setTrackingCode(code);
-            setSubmitted(true);
+    const [location, setLocation] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-            // Here you would typically send to backend
-            console.log('Wishlist submitted:', { childName, age, email, wishes, trackingCode: code });
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        if (childName && age && wishes.length > 0) {
+            setIsSubmitting(true);
+            try {
+                // Construct the payload for the backend
+                const payload = {
+                    name: childName,
+                    age: parseInt(age),
+                    location: location || "Unknown Region", // Default if not provided
+                    // We assume new children are "nice" by default, or random? Let's default to 'nice'.
+                    status: 'nice',
+                    wishes: wishes.map(w => ({
+                        item: w.item,
+                        priority: w.priority
+                    }))
+                };
+
+                const response = await fetch('http://localhost:3000/api/wishlists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send wishlist to Santa');
+                }
+
+                // Generate a tracking code
+                const code = `SANTA-${Date.now().toString(36).toUpperCase()}`;
+                setTrackingCode(code);
+                setSubmitted(true);
+
+                // Reset form optionally or just show success screen (current behavior)
+            } catch (err: any) {
+                console.error("Submission error:", err);
+                setError(err.message || 'Something went wrong. Santa could not receive your list.');
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -197,6 +234,20 @@ const Wishlist = () => {
 
                             <div className="md:col-span-2">
                                 <label className="block text-xs font-bold text-stardust-400 mb-2 uppercase tracking-wide">
+                                    Your City / Country *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    placeholder="e.g., London, UK"
+                                    required
+                                    className="glass-input w-full px-4 py-3 rounded-xl focus:shadow-neon-gold transition-all"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-stardust-400 mb-2 uppercase tracking-wide">
                                     Email (Optional - for tracking updates)
                                 </label>
                                 <input
@@ -337,14 +388,21 @@ const Wishlist = () => {
                         )}
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="p-4 rounded-xl bg-festive-red-500/20 border border-festive-red-500 text-center text-festive-red-200">
+                            <p>{error}</p>
+                        </div>
+                    )}
+
                     {/* Submit Button */}
                     <div className="text-center">
                         <button
                             type="submit"
-                            disabled={!childName || !age || wishes.length === 0}
-                            className="btn-primary px-16 py-6 text-2xl"
+                            disabled={!childName || !age || !location || wishes.length === 0 || isSubmitting}
+                            className={`btn-primary px-16 py-6 text-2xl transition-all ${isSubmitting ? 'opacity-75 cursor-wait' : ''}`}
                         >
-                            🎅 Send to Santa
+                            {isSubmitting ? 'Sending to North Pole...' : '🎅 Send to Santa'}
                         </button>
                         <p className="text-frost-200/40 text-xs mt-4 font-mono uppercase tracking-widest">
                             {wishes.length === 0 ? 'Add at least one wish to submit' : 'Ready to send your wishlist!'}

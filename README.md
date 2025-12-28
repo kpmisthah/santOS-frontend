@@ -60,6 +60,9 @@ npm run dev
 - `/worker/dashboard` - Worker dashboard with personal stats
 - `/worker/tasks` - Task management and progress updates
 
+### User Routes
+- `/user/wishlist` - Public wishlist submission form for children
+
 ## 🎨 Color Palette
 
 - **Santa Red**: `#C41E3A`
