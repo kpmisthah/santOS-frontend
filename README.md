@@ -15,13 +15,23 @@ A modern, beautiful web application built with React, TypeScript, and Tailwind C
   - Filter by Nice/Naughty status
   - Search by name or location
   - View detailed wishlist items with priorities
+  - **Toggle Nice/Naughty status** with one click (😇/😈)
+  - Real-time chart updates when status changes
 - **Task Assignment**: Assign gift production tasks to elves
 - **Delivery Tracking**: Monitor deliveries across all regions worldwide
 
 ### 🧝 Worker (Elf) Features
-- **Personal Dashboard**: Track your performance and productivity
-- **Task Management**: View and update assigned tasks
-- **Progress Tracking**: Update task progress with notes
+- **Personal Dashboard**: 
+  - Real-time task statistics
+  - Track your performance and productivity
+  - View assigned, pending, in-progress, and completed tasks
+  - Auto-refreshes every 30 seconds
+- **Task Management**: 
+  - View all assigned tasks with details
+  - **Start tasks** (pending → in-progress)
+  - **Mark tasks as complete** (in-progress → completed)
+  - Filter tasks by status
+  - Update progress with notes
 - **Achievements**: Earn badges for outstanding performance
 
 ### 👶 Public Features
