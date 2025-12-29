@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 import type { WorkerStats, Task } from '../../types';
 
 const WorkerDashboard = () => {
+    const user = useAuthStore((state) => state.user);
     const [stats, setStats] = useState<WorkerStats>({
         assignedTasks: 0,
         completedTasks: 0,
@@ -11,58 +13,53 @@ const WorkerDashboard = () => {
     });
 
     const [recentTasks, setRecentTasks] = useState<Task[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate API call
-        setTimeout(() => {
-            setStats({
-                assignedTasks: 15,
-                completedTasks: 8,
-                pendingTasks: 3,
-                inProgressTasks: 4,
-                productivity: 75,
-            });
+        const fetchTasks = async () => {
+            if (!user?.id) return;
 
-            setRecentTasks([
-                {
-                    id: '1',
-                    title: 'Build 500 Toy Cars',
-                    description: 'Red and blue racing cars',
-                    giftType: 'Toy Cars',
-                    quantity: 500,
-                    status: 'in-progress',
-                    priority: 'high',
-                    deadline: '2024-12-20',
-                    createdAt: '2024-12-01',
-                    updatedAt: '2024-12-15',
-                },
-                {
-                    id: '2',
-                    title: 'Paint Action Figures',
-                    description: 'Superhero action figures',
-                    giftType: 'Action Figures',
-                    quantity: 300,
-                    status: 'in-progress',
-                    priority: 'medium',
-                    deadline: '2024-12-22',
-                    createdAt: '2024-12-10',
-                    updatedAt: '2024-12-18',
-                },
-                {
-                    id: '3',
-                    title: 'Assemble Dollhouses',
-                    description: 'Victorian style dollhouses',
-                    giftType: 'Dollhouses',
-                    quantity: 200,
-                    status: 'completed',
-                    priority: 'high',
-                    deadline: '2024-12-18',
-                    createdAt: '2024-12-05',
-                    updatedAt: '2024-12-17',
-                },
-            ]);
-        }, 500);
-    }, []);
+            try {
+                const response = await fetch(`http://localhost:3000/api/tasks/user/${user.id}`);
+                if (response.ok) {
+                    const tasks = await response.json();
+                    setRecentTasks(tasks);
+
+                    // Calculate stats
+                    const completed = tasks.filter((t: Task) => t.status === 'completed').length;
+                    const pending = tasks.filter((t: Task) => t.status === 'pending').length;
+                    const inProgress = tasks.filter((t: Task) => t.status === 'in-progress').length;
+
+                    setStats({
+                        assignedTasks: tasks.length,
+                        completedTasks: completed,
+                        pendingTasks: pending,
+                        inProgressTasks: inProgress,
+                        productivity: tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0,
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch tasks', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTasks();
+        const interval = setInterval(fetchTasks, 30000); // Refresh every 30s
+        return () => clearInterval(interval);
+    }, [user?.id]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-evergreen-400 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-frost-200 animate-pulse">Loading your tasks...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fade-in text-frost-100">

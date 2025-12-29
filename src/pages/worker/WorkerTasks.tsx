@@ -1,79 +1,33 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 import type { Task } from '../../types';
 
 const WorkerTasks = () => {
+    const user = useAuthStore((state) => state.user);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [filter, setFilter] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        // Simulate API call
-        setTimeout(() => {
-            setTasks([
-                {
-                    id: '1',
-                    title: 'Build 500 Toy Cars',
-                    description: 'Red and blue racing cars with remote control features. Ensure quality control on all units.',
-                    giftType: 'Toy Cars',
-                    quantity: 500,
-                    status: 'in-progress',
-                    priority: 'high',
-                    deadline: '2024-12-20',
-                    createdAt: '2024-12-01',
-                    updatedAt: '2024-12-15',
-                },
-                {
-                    id: '2',
-                    title: 'Paint 300 Action Figures',
-                    description: 'Superhero action figures with detailed painting and accessories',
-                    giftType: 'Action Figures',
-                    quantity: 300,
-                    status: 'in-progress',
-                    priority: 'medium',
-                    deadline: '2024-12-22',
-                    createdAt: '2024-12-10',
-                    updatedAt: '2024-12-18',
-                },
-                {
-                    id: '3',
-                    title: 'Assemble 200 Dollhouses',
-                    description: 'Victorian style dollhouses with complete furniture sets',
-                    giftType: 'Dollhouses',
-                    quantity: 200,
-                    status: 'completed',
-                    priority: 'high',
-                    deadline: '2024-12-18',
-                    createdAt: '2024-12-05',
-                    updatedAt: '2024-12-17',
-                },
-                {
-                    id: '4',
-                    title: 'Package 400 Board Games',
-                    description: 'Family board games with all pieces and instructions',
-                    giftType: 'Board Games',
-                    quantity: 400,
-                    status: 'pending',
-                    priority: 'low',
-                    deadline: '2024-12-23',
-                    createdAt: '2024-12-12',
-                    updatedAt: '2024-12-12',
-                },
-                {
-                    id: '5',
-                    title: 'Build 600 LEGO Sets',
-                    description: 'Various LEGO sets including Star Wars and City themes',
-                    giftType: 'LEGO Sets',
-                    quantity: 600,
-                    status: 'completed',
-                    priority: 'high',
-                    deadline: '2024-12-16',
-                    createdAt: '2024-12-01',
-                    updatedAt: '2024-12-15',
-                },
-            ]);
-        }, 500);
-    }, []);
+        const fetchTasks = async () => {
+            if (!user?.id) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/tasks/user/${user.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setTasks(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch tasks', error);
+            }
+        };
+
+        fetchTasks();
+        const interval = setInterval(fetchTasks, 30000);
+        return () => clearInterval(interval);
+    }, [user?.id]);
 
     const filteredTasks = tasks.filter(task => filter === 'all' || task.status === filter);
 
@@ -84,11 +38,26 @@ const WorkerTasks = () => {
         completed: tasks.filter(t => t.status === 'completed').length,
     };
 
-    const updateTaskStatus = (taskId: string, newStatus: Task['status']) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date().toISOString() } : task
-        ));
-        setIsModalOpen(false);
+    const updateTaskStatus = async (taskId: string, newStatus: Task['status']) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (response.ok) {
+                // Update local state
+                setTasks(tasks.map(task =>
+                    task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date().toISOString() } : task
+                ));
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            console.error('Failed to update task status', error);
+        }
     };
 
     return (
