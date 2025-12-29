@@ -61,6 +61,28 @@ const ChildrenWishlists = () => {
         setIsModalOpen(true);
     };
 
+    const toggleCategory = async (child: any) => {
+        const newCategory = child.category === 'nice' ? 'naughty' : 'nice';
+        try {
+            const response = await fetch(`http://localhost:3000/api/wishlists/child/${child.id}/category`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ category: newCategory }),
+            });
+
+            if (response.ok) {
+                // Update local state
+                setChildren(children.map(c =>
+                    c.id === child.id ? { ...c, category: newCategory } : c
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to toggle category', error);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Page Header */}
@@ -216,8 +238,15 @@ const ChildrenWishlists = () => {
                                             >
                                                 View Wishlist
                                             </button>
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-frost-200 hover:text-white">
-                                                <span className="text-lg">✏️</span>
+                                            <button
+                                                onClick={() => toggleCategory(child)}
+                                                className={`px-3 py-2 rounded-lg transition-all text-sm font-medium border ${child.category === 'nice'
+                                                        ? 'bg-festive-red-500/10 hover:bg-festive-red-500/20 text-festive-red-400 border-festive-red-500/30 hover:shadow-neon-red'
+                                                        : 'bg-evergreen-500/10 hover:bg-evergreen-500/20 text-evergreen-400 border-evergreen-500/30 hover:shadow-glow-sm'
+                                                    }`}
+                                                title={`Mark as ${child.category === 'nice' ? 'Naughty' : 'Nice'}`}
+                                            >
+                                                {child.category === 'nice' ? '😈' : '😇'}
                                             </button>
                                         </div>
                                     </td>
