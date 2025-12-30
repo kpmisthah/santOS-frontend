@@ -5,7 +5,7 @@ import type { Task } from '../../types';
 const WorkerTasks = () => {
     const user = useAuthStore((state) => state.user);
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [filter, setFilter] = useState<'all' | 'pending' | 'in-progress' | 'completed'>('all');
+    const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,7 +34,7 @@ const WorkerTasks = () => {
     const stats = {
         total: tasks.length,
         pending: tasks.filter(t => t.status === 'pending').length,
-        inProgress: tasks.filter(t => t.status === 'in-progress').length,
+        inProgress: tasks.filter(t => t.status === 'in_progress').length,
         completed: tasks.filter(t => t.status === 'completed').length,
     };
 
@@ -57,6 +57,29 @@ const WorkerTasks = () => {
             }
         } catch (error) {
             console.error('Failed to update task status', error);
+        }
+    };
+
+    const updateTaskDetails = async (progress: number, notes: string) => {
+        if (!selectedTask) return;
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/tasks/${selectedTask.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ progress, notes }),
+            });
+
+            if (response.ok) {
+                setTasks(tasks.map(task =>
+                    task.id === selectedTask.id ? { ...task, progress, notes, updatedAt: new Date().toISOString() } : task
+                ));
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            console.error('Failed to update task details', error);
         }
     };
 
@@ -106,7 +129,7 @@ const WorkerTasks = () => {
 
             {/* Filter Tabs */}
             <div className="glass-panel p-2 inline-flex gap-2 rounded-xl">
-                {(['all', 'pending', 'in-progress', 'completed'] as const).map((status) => (
+                {(['all', 'pending', 'in_progress', 'completed'] as const).map((status) => (
                     <button
                         key={status}
                         onClick={() => setFilter(status)}
@@ -115,7 +138,7 @@ const WorkerTasks = () => {
                             : 'text-north-pole-400 hover:text-frost-100 hover:bg-white/5'
                             }`}
                     >
-                        {status === 'in-progress' ? 'In Progress' : status}
+                        {status === 'in_progress' ? 'In Progress' : status}
                     </button>
                 ))}
             </div>
@@ -166,13 +189,13 @@ const WorkerTasks = () => {
                                                 <span
                                                     className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide ${task.status === 'completed'
                                                         ? 'text-evergreen-400'
-                                                        : task.status === 'in-progress'
+                                                        : task.status === 'in_progress'
                                                             ? 'text-festive-red-400'
                                                             : 'text-stardust-400'
                                                         }`}
                                                 >
                                                     {task.status === 'completed' && <span className="animate-pulse">✅</span>}
-                                                    {task.status === 'in-progress' && <span className="animate-spin-slow">🔄</span>}
+                                                    {task.status === 'in_progress' && <span className="animate-spin-slow">🔄</span>}
                                                     {task.status === 'pending' && <span>⏱️</span>}
                                                     {task.status.replace('-', ' ')}
                                                 </span>
@@ -186,13 +209,13 @@ const WorkerTasks = () => {
                             <div className="flex lg:flex-col gap-3 flex-shrink-0 min-w-[180px]">
                                 {task.status === 'pending' && (
                                     <button
-                                        onClick={() => updateTaskStatus(task.id, 'in-progress')}
+                                        onClick={() => updateTaskStatus(task.id, 'in_progress')}
                                         className="w-full px-4 py-3 bg-festive-red-500/10 hover:bg-festive-red-500/20 text-festive-red-400 border border-festive-red-500/20 rounded-xl font-bold uppercase tracking-wide transition-all hover:shadow-neon-red text-xs"
                                     >
                                         Start Task
                                     </button>
                                 )}
-                                {task.status === 'in-progress' && (
+                                {task.status === 'in_progress' && (
                                     <>
                                         <button
                                             onClick={() => {
@@ -220,7 +243,7 @@ const WorkerTasks = () => {
                         </div>
 
                         {/* Progress Bar for In-Progress Tasks */}
-                        {task.status === 'in-progress' && (
+                        {task.status === 'in_progress' && (
                             <div className="mt-6 pt-5 border-t border-white/5 relative z-10">
                                 <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-2">
                                     <span className="text-north-pole-400">Progress</span>
@@ -252,10 +275,7 @@ const WorkerTasks = () => {
                 <UpdateProgressModal
                     task={selectedTask}
                     onClose={() => setIsModalOpen(false)}
-                    onUpdate={(progress) => {
-                        console.log('Updating progress:', progress);
-                        setIsModalOpen(false);
-                    }}
+                    onUpdate={updateTaskDetails}
                 />
             )}
         </div>
@@ -266,16 +286,16 @@ const WorkerTasks = () => {
 interface UpdateProgressModalProps {
     task: Task;
     onClose: () => void;
-    onUpdate: (progress: number) => void;
+    onUpdate: (progress: number, notes: string) => void;
 }
 
 const UpdateProgressModal = ({ task, onClose, onUpdate }: UpdateProgressModalProps) => {
-    const [progress, setProgress] = useState(65);
-    const [notes, setNotes] = useState('');
+    const [progress, setProgress] = useState(task.progress || 0);
+    const [notes, setNotes] = useState(task.notes || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onUpdate(progress);
+        onUpdate(progress, notes);
     };
 
     return (

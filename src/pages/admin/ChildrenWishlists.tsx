@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import type { Child } from '../../types';
+import type { Child, WishlistItem } from '../../types';
+
+interface Worker {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+}
 
 const ChildrenWishlists = () => {
     const [children, setChildren] = useState<any[]>([]); // Using any for flexible transformation
@@ -7,7 +14,21 @@ const ChildrenWishlists = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedChild, setSelectedChild] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [workers, setWorkers] = useState<Worker[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch workers (elves)
+    const fetchWorkers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/users');
+            if (response.ok) {
+                const data = await response.json();
+                setWorkers(data.filter((u: any) => u.role === 'worker'));
+            }
+        } catch (error) {
+            console.error("Failed to fetch workers", error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,6 +59,7 @@ const ChildrenWishlists = () => {
         };
 
         fetchData();
+        fetchWorkers();
         // Poll for updates every 10s to see new submissions live!
         const interval = setInterval(fetchData, 10000);
         return () => clearInterval(interval);
@@ -84,7 +106,7 @@ const ChildrenWishlists = () => {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className={`space-y-8 animate-fade-in ${isLoading ? 'opacity-50' : ''}`}>
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -241,8 +263,8 @@ const ChildrenWishlists = () => {
                                             <button
                                                 onClick={() => toggleCategory(child)}
                                                 className={`px-3 py-2 rounded-lg transition-all text-sm font-medium border ${child.category === 'nice'
-                                                        ? 'bg-festive-red-500/10 hover:bg-festive-red-500/20 text-festive-red-400 border-festive-red-500/30 hover:shadow-neon-red'
-                                                        : 'bg-evergreen-500/10 hover:bg-evergreen-500/20 text-evergreen-400 border-evergreen-500/30 hover:shadow-glow-sm'
+                                                    ? 'bg-festive-red-500/10 hover:bg-festive-red-500/20 text-festive-red-400 border-festive-red-500/30 hover:shadow-neon-red'
+                                                    : 'bg-evergreen-500/10 hover:bg-evergreen-500/20 text-evergreen-400 border-evergreen-500/30 hover:shadow-glow-sm'
                                                     }`}
                                                 title={`Mark as ${child.category === 'nice' ? 'Naughty' : 'Nice'}`}
                                             >
@@ -267,97 +289,246 @@ const ChildrenWishlists = () => {
 
             {/* Wishlist Modal */}
             {isModalOpen && selectedChild && (
-                <WishlistModal child={selectedChild} onClose={() => setIsModalOpen(false)} />
+                <WishlistModal
+                    child={selectedChild}
+                    onClose={() => setIsModalOpen(false)}
+                    workers={workers}
+                />
             )}
         </div>
     );
 };
 
 // Wishlist Modal Component
-interface WishlistModalProps {
-    child: Child;
-    onClose: () => void;
+interface ExtendedChild extends Child {
+    items?: WishlistItem[];
+    wishlistId?: string;
 }
 
-const WishlistModal = ({ child, onClose }: WishlistModalProps) => {
-    const wishlistItems = [
-        { id: '1', name: 'LEGO Star Wars Set', priority: 'high', status: 'approved' },
-        { id: '2', name: 'Bicycle', priority: 'high', status: 'approved' },
-        { id: '3', name: 'Art Supplies Kit', priority: 'medium', status: 'pending' },
-        { id: '4', name: 'Board Games', priority: 'low', status: 'approved' },
-    ];
+interface WishlistModalProps {
+    child: ExtendedChild;
+    onClose: () => void;
+    workers: Worker[];
+}
+
+const WishlistModal = ({ child, onClose, workers }: WishlistModalProps) => {
+    // Use real wishlist items from the child object
+    const wishlistItems = child.items || [];
+    const [assignedItems, setAssignedItems] = useState<Set<string>>(new Set());
+    const [assigningId, setAssigningId] = useState<string | null>(null);
+    const [selectedWorker, setSelectedWorker] = useState<string>("");
+
+    const handleAssignTask = async (item: WishlistItem) => {
+        if (!selectedWorker) return;
+
+        try {
+            const response = await fetch('http://localhost:3000/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: `Build ${item.giftName} for ${child.name}`,
+                    description: `Gift request from ${child.name} (Age: ${child.age}, Location: ${child.location}). priority: ${item.priority}`,
+                    giftType: item.giftName,
+                    quantity: 1,
+                    priority: item.priority,
+                    assignedTo: selectedWorker,
+                    deadline: new Date(new Date().getFullYear(), 11, 24).toISOString() // Xmas Eve
+                })
+            });
+
+            if (response.ok) {
+                setAssignedItems(prev => new Set(prev).add(item.id));
+                setAssigningId(null);
+                setSelectedWorker("");
+                alert(`Task assigned to ${workers.find(w => w.id === selectedWorker)?.name}!`);
+            }
+        } catch (error) {
+            console.error("Failed to assign task", error);
+            alert("Failed to create task");
+        }
+    };
+
+    // Calculate statistics
+    const stats = {
+        total: wishlistItems.length,
+        high: wishlistItems.filter((item: any) => item.priority === 'high').length,
+        medium: wishlistItems.filter((item: any) => item.priority === 'medium').length,
+        low: wishlistItems.filter((item: any) => item.priority === 'low').length,
+    };
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all animate-scale-in border border-stardust-400/20 shadow-2xl shadow-stardust-900/50" onClick={(e) => e.stopPropagation()}>
+            <div className="glass-card max-w-3xl w-full max-h-[90vh] overflow-y-auto transform transition-all animate-scale-in border border-stardust-400/20 shadow-2xl shadow-stardust-900/50" onClick={(e) => e.stopPropagation()}>
                 {/* Modal Header */}
-                <div className="sticky top-0 bg-north-pole-900/90 backdrop-blur-md border-b border-white/10 p-8 flex items-center justify-between z-10">
-                    <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h2 className="text-3xl font-display font-bold text-gradient-gold">{child.name}'s Wishlist</h2>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${child.category === 'nice' ? 'border-evergreen-500 text-evergreen-400' : 'border-festive-red-500 text-festive-red-400'}`}>
-                                {child.category} List
-                            </span>
+                <div className="sticky top-0 bg-north-pole-900/90 backdrop-blur-md border-b border-white/10 p-6 md:p-8 z-10">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h2 className="text-2xl md:text-3xl font-display font-bold text-gradient-gold">{child.name}'s Wishlist</h2>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${child.category === 'nice' ? 'border-evergreen-500 text-evergreen-400' : 'border-festive-red-500 text-festive-red-400'}`}>
+                                    {child.category} List
+                                </span>
+                            </div>
+
+                            {/* Child Info */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs md:text-sm">
+                                <div className="flex items-center gap-2 text-frost-200/60">
+                                    <span className="text-base">📍</span>
+                                    <span className="font-mono">{child.location}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-frost-200/60">
+                                    <span className="text-base">🎂</span>
+                                    <span className="font-mono">{child.age} years old</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-frost-200/60">
+                                    <span className="text-base">📅</span>
+                                    <span className="font-mono">Submitted: {new Date(child.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-frost-200/60">
+                                    <span className="text-base">🆔</span>
+                                    <span className="font-mono text-[10px]">ID: {child.wishlistId?.substring(0, 8)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-frost-200/60 flex items-center gap-2 text-sm font-mono">
-                            <span>📍 {child.location}</span>
-                            <span className="text-north-pole-500">•</span>
-                            <span>🎂 {child.age} years old</span>
-                        </p>
+                        <button
+                            onClick={onClose}
+                            className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors group flex-shrink-0"
+                        >
+                            <span className="text-xl group-hover:rotate-90 transition-transform duration-300 block">✖️</span>
+                        </button>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors group"
-                    >
-                        <span className="text-xl group-hover:rotate-90 transition-transform duration-300 block">✖️</span>
-                    </button>
                 </div>
 
+                {/* Stats Cards */}
+                {wishlistItems.length > 0 && (
+                    <div className="px-6 md:px-8 pt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="glass-panel p-3 rounded-lg border border-white/5">
+                            <p className="text-[10px] text-frost-200/60 uppercase tracking-wider mb-1">Total Wishes</p>
+                            <p className="text-2xl font-bold text-stardust-400">{stats.total}</p>
+                        </div>
+                        <div className="glass-panel p-3 rounded-lg border border-festive-red-500/20">
+                            <p className="text-[10px] text-frost-200/60 uppercase tracking-wider mb-1">High Priority</p>
+                            <p className="text-2xl font-bold text-festive-red-400">{stats.high}</p>
+                        </div>
+                        <div className="glass-panel p-3 rounded-lg border border-stardust-500/20">
+                            <p className="text-[10px] text-frost-200/60 uppercase tracking-wider mb-1">Medium</p>
+                            <p className="text-2xl font-bold text-stardust-400">{stats.medium}</p>
+                        </div>
+                        <div className="glass-panel p-3 rounded-lg border border-blue-500/20">
+                            <p className="text-[10px] text-frost-200/60 uppercase tracking-wider mb-1">Low Priority</p>
+                            <p className="text-2xl font-bold text-blue-400">{stats.low}</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Modal Content */}
-                <div className="p-8 space-y-4">
-                    {wishlistItems.map((item) => (
-                        <div key={item.id} className="bg-north-pole-800/40 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-white/10 hover:bg-north-pole-800/60 transition-all group">
-                            <div className="flex items-center gap-5">
-                                <div className="w-12 h-12 bg-festive-red-900/20 rounded-xl flex items-center justify-center text-2xl border border-festive-red-500/10 group-hover:scale-110 transition-transform">🎁</div>
-                                <div>
-                                    <p className="font-semibold text-lg text-frost-100">{item.name}</p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className={`text-[10px] px-2 py-1 rounded-sm font-bold uppercase tracking-wider ${item.priority === 'high' ? 'bg-festive-red-500/20 text-festive-red-400' :
-                                            item.priority === 'medium' ? 'bg-stardust-500/20 text-stardust-400' :
-                                                'bg-blue-500/20 text-blue-400'
-                                            }`}>
-                                            {item.priority} priority
-                                        </span>
-                                        <span className={`text-[10px] px-2 py-1 rounded-sm font-bold uppercase tracking-wider ${item.status === 'approved' ? 'bg-evergreen-500/20 text-evergreen-400' :
-                                            'bg-stardust-500/20 text-stardust-400'
-                                            }`}>
-                                            {item.status}
-                                        </span>
+                <div className="p-6 md:p-8 space-y-3">
+                    {wishlistItems.length > 0 ? (
+                        <>
+                            <h3 className="text-lg font-bold text-frost-100 mb-4 flex items-center gap-2">
+                                <span>🎁</span>
+                                <span>Requested Gifts</span>
+                            </h3>
+                            {wishlistItems.map((item: any, index: number) => (
+                                <div key={item.id} className="bg-north-pole-800/40 border border-white/5 rounded-xl p-4 md:p-5 flex flex-col gap-4 overflow-hidden relative group">
+                                    {/* Status / Assign UI */}
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-2xl font-bold text-north-pole-500 w-8">#{index + 1}</span>
+                                                <div className="w-12 h-12 bg-festive-red-900/20 rounded-xl flex items-center justify-center text-2xl border border-festive-red-500/10 group-hover:scale-110 transition-transform flex-shrink-0">
+                                                    {item.priority === 'high' ? '⭐' : item.priority === 'medium' ? '✨' : '💫'}
+                                                </div>
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-xs text-north-pole-400 uppercase tracking-wide mb-1">Wants:</p>
+                                                <p className="font-bold text-lg md:text-xl text-frost-100 mb-2 leading-tight">{item.giftName}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] px-2 py-1 rounded-sm font-bold uppercase tracking-wider ${item.priority === 'high' ? 'bg-festive-red-500/20 text-festive-red-400 border border-festive-red-500/30' :
+                                                        item.priority === 'medium' ? 'bg-stardust-500/20 text-stardust-400 border border-stardust-500/30' :
+                                                            'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                                        }`}>
+                                                        {item.priority} priority
+                                                    </span>
+                                                    {assignedItems.has(item.id) && (
+                                                        <span className="text-[10px] px-2 py-1 rounded-sm font-bold uppercase tracking-wider bg-evergreen-500/20 text-evergreen-400 border border-evergreen-500/30 flex items-center gap-1">
+                                                            <span>✅</span> Task Created
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Button */}
+                                        {!assignedItems.has(item.id) && (
+                                            <div className="flex-shrink-0">
+                                                {assigningId === item.id ? (
+                                                    <div className="flex items-center gap-2 bg-north-pole-900/80 p-2 rounded-lg border border-stardust-500/30 animate-fade-in">
+                                                        <select
+                                                            className="glass-input text-xs py-1 px-2 w-32"
+                                                            value={selectedWorker}
+                                                            onChange={(e) => setSelectedWorker(e.target.value)}
+                                                        >
+                                                            <option value="">Select Elf...</option>
+                                                            {workers.map(w => (
+                                                                <option key={w.id} value={w.id} className="text-black">{w.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <button
+                                                            onClick={() => handleAssignTask(item as unknown as WishlistItem)}
+                                                            disabled={!selectedWorker}
+                                                            className="bg-stardust-500 text-north-pole-900 px-2 py-1 rounded text-xs font-bold disabled:opacity-50 hover:bg-stardust-400"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAssigningId(null)}
+                                                            className="text-festive-red-400 hover:bg-white/10 p-1 rounded"
+                                                        >
+                                                            ✖️
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setAssigningId(item.id)}
+                                                        className="px-4 py-2 bg-north-pole-700/50 hover:bg-stardust-500/20 text-stardust-400 border border-stardust-500/20 hover:border-stardust-500/50 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+                                                    >
+                                                        <span>👷</span> Assign Elf
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </>
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="text-6xl mb-4 opacity-50 grayscale">🎁</div>
+                            <p className="text-frost-200/60 text-lg">No wishlist items yet</p>
+                            <p className="text-sm text-north-pole-400 mt-2">This child hasn't added any wishes to their list.</p>
+                        </div>
+                    )}
+
+                    {/* Additional Info */}
+                    {wishlistItems.length > 0 && (
+                        <div className="mt-6 pt-6 border-t border-white/5 space-y-3">
+                            <div className="glass-panel p-4 rounded-xl border border-stardust-500/20">
+                                <div className="flex items-start gap-3">
+                                    <span className="text-2xl">ℹ️</span>
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-sm text-frost-100 mb-1">Wishlist Summary</h4>
+                                        <p className="text-xs text-frost-200/60 leading-relaxed">
+                                            {child.name} has requested <span className="text-stardust-400 font-bold">{stats.total}</span> gift{stats.total !== 1 ? 's' : ''} for Christmas.
+                                            {stats.high > 0 && <span> <span className="text-festive-red-400 font-bold">{stats.high}</span> high priority item{stats.high !== 1 ? 's' : ''}.</span>}
+                                            {stats.medium > 0 && <span> <span className="text-stardust-400 font-bold">{stats.medium}</span> medium priority.</span>}
+                                            {stats.low > 0 && <span> <span className="text-blue-400 font-bold">{stats.low}</span> low priority.</span>}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                            {item.status === 'pending' ? (
-                                <div className="flex gap-3">
-                                    <button className="px-4 py-2 bg-evergreen-500/20 hover:bg-evergreen-500/30 text-evergreen-400 border border-evergreen-500/30 rounded-lg text-sm font-bold uppercase tracking-wide transition-all hover:scale-105">
-                                        Approve
-                                    </button>
-                                    <button className="px-4 py-2 bg-festive-red-500/20 hover:bg-festive-red-500/30 text-festive-red-400 border border-festive-red-500/30 rounded-lg text-sm font-bold uppercase tracking-wide transition-all hover:scale-105">
-                                        Reject
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="text-2xl opacity-50">
-                                    {item.status === 'approved' ? '✅' : '❌'}
-                                </div>
-                            )}
                         </div>
-                    ))}
-                    <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
-                        <button className="btn-primary flex items-center gap-2 px-6">
-                            <span>Add New Wish</span>
-                            <span className="text-xl">+</span>
-                        </button>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

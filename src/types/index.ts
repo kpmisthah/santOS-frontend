@@ -50,7 +50,10 @@ export interface Task {
     quantity: number;
     assignedTo?: string;
     assignedToName?: string;
-    status: 'pending' | 'in-progress' | 'completed';
+    status: 'pending' | 'in_progress' | 'completed';
+    assignee?: User;
+    progress?: number;
+    notes?: string;
     priority: 'high' | 'medium' | 'low';
     deadline: string;
     createdAt: string;
@@ -61,11 +64,12 @@ export interface Task {
 export interface Delivery {
     id: string;
     childId: string;
+    child?: Child;
     childName: string;
     region: string;
     address: string;
     giftItems: string[];
-    status: 'pending' | 'in-transit' | 'delivered';
+    status: 'pending' | 'in_transit' | 'delivered';
     deliveryDate?: string;
     createdAt: string;
     updatedAt: string;

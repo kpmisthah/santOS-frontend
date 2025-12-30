@@ -28,7 +28,7 @@ const WorkerDashboard = () => {
                     // Calculate stats
                     const completed = tasks.filter((t: Task) => t.status === 'completed').length;
                     const pending = tasks.filter((t: Task) => t.status === 'pending').length;
-                    const inProgress = tasks.filter((t: Task) => t.status === 'in-progress').length;
+                    const inProgress = tasks.filter((t: Task) => t.status === 'in_progress').length;
 
                     setStats({
                         assignedTasks: tasks.length,
