@@ -63,16 +63,21 @@ export interface Task {
 // Delivery Types
 export interface Delivery {
     id: string;
-    childId: string;
+    childId?: string;
     child?: Child;
-    childName: string;
+    childName?: string;
     region: string;
-    address: string;
-    giftItems: string[];
+    country?: string;
+    address?: string;
+    giftItems?: string[];
     status: 'pending' | 'in_transit' | 'delivered';
     deliveryDate?: string;
+    totalPackages?: number;
+    deliveredPackages?: number;
+    estimatedArrival?: string;
+    assignedTo?: string;
     createdAt: string;
-    updatedAt: string;
+    updatedAt?: string;
 }
 
 // Dashboard Statistics
@@ -110,4 +115,21 @@ export interface PaginatedResponse<T> {
     page: number;
     limit: number;
     totalPages: number;
+}
+
+// Worker Type
+export interface Worker {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+}
+
+// Activity Type
+export interface Activity {
+    id: string;
+    message: string;
+    time: string;
+    icon: string;
+    type: string;
 }

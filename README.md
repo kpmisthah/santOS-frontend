@@ -67,9 +67,11 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
   - Beautiful, festive UI with smooth animations
 - **Gift Tracking**: Track delivery status by tracking code
   - Enter tracking code (e.g., `SANTA-ABC12345`)
-  - See real-time delivery status
-  - View delivery timeline with progress bar
+  - **🏭 Toy Factory Status**: Real-time production progress (0-100%) from worker updates
+  - **🚚 Delivery Status**: Shipping progress (Preparing → In Transit → Delivered)
+  - View delivery timeline with progress bars
   - Estimated delivery date
+  - Separate visualization for production vs shipping stages
 - **About Page**: Learn about the North Pole and Santa's workshop
 - **Contact Page**: Contact form for inquiries
 - **FAQ Page**: Frequently asked questions
@@ -290,8 +292,7 @@ npm run lint
 ## ⚠️ Known Issues
 
 ### API Configuration
-- **Hardcoded API URLs**: All API calls use `http://localhost:3000` (not production-ready)
-- **No Environment Variables**: API base URL is not configurable via `.env`
+- **No WebSocket Support**: Real-time updates use polling instead of WebSockets.
 - **Files Affected**: Login.tsx, AdminDashboard.tsx, ChildrenWishlists.tsx, TaskAssignment.tsx, DeliveryTracking.tsx, WorkerDashboard.tsx, WorkerTasks.tsx, Wishlist.tsx, TrackGift.tsx
 
 ### Recommended Fixes

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
     Chart as ChartJS,
@@ -10,6 +11,8 @@ import {
     ArcElement
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/api/client';
 
 ChartJS.register(
     CategoryScale,
@@ -20,6 +23,8 @@ ChartJS.register(
     Legend,
     ArcElement
 );
+
+
 
 type DashboardStats = {
     totalChildren: number;
@@ -33,6 +38,7 @@ type DashboardStats = {
 };
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState<DashboardStats>({
         totalChildren: 0,
         totalGifts: 0,
@@ -52,18 +58,14 @@ const AdminDashboard = () => {
         const fetchData = async () => {
             try {
                 // Fetch Stats
-                const statsRes = await fetch('http://localhost:3000/api/analytics/stats');
-                if (!statsRes.ok) throw new Error('Failed to fetch stats');
-                const data = await statsRes.json();
-                setStats(data);
+                const statsData = await apiClient.get('/analytics/stats');
+                setStats(statsData);
 
                 // Fetch Demand for Charts
-                const demandRes = await fetch('http://localhost:3000/api/analytics/demand');
-                if (!demandRes.ok) throw new Error('Failed to fetch demand data');
-                const demandData = await demandRes.json();
+                const demandDataRes = await apiClient.get('/analytics/demand');
 
                 // Process global demand for bar chart (Top 5)
-                const topGifts = demandData.global_demand.slice(0, 5);
+                const topGifts = demandDataRes.global_demand.slice(0, 5);
                 setDemandData({
                     labels: topGifts.map((d: any) => d.gift_name),
                     datasets: [
@@ -234,7 +236,6 @@ const AdminDashboard = () => {
 
             {/* Charts and Activity Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Task Progress */}
                 {/* Task Progress & Analytics */}
                 <div className="lg:col-span-2 glass-card p-8">
                     <h2 className="text-2xl font-display font-bold mb-8 text-frost-100 flex items-center gap-3">
@@ -303,7 +304,6 @@ const AdminDashboard = () => {
 
                     {/* Quick Stats Summary */}
                     <div className="grid grid-cols-2 gap-6 mt-8">
-                        {/* ... (Existing Quick Stats logic preserved but updated if needed) ... */}
                         <div className="bg-north-pole-900/50 border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center text-center group hover:border-stardust-400/30 transition-colors">
                             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">⏱️</div>
                             <div className="text-3xl font-display font-bold text-frost-100 mb-1">{stats.pendingTasks}</div>
@@ -345,19 +345,30 @@ const AdminDashboard = () => {
             <div className="glass-card p-8">
                 <h2 className="text-2xl font-display font-bold mb-8 text-frost-100">Quick Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button className="btn-primary flex items-center justify-center gap-3 group">
+                    <button
+                        onClick={() => navigate('/admin/children')}
+                        className="btn-primary flex items-center justify-center gap-3 group"
+                    >
                         <span className="text-2xl group-hover:rotate-12 transition-transform">👶</span>
                         <span className="font-semibold tracking-wide">View Children</span>
                     </button>
-                    <button className="btn-secondary flex items-center justify-center gap-3 group hover:border-evergreen-500/50 hover:bg-evergreen-900/20 hover:text-evergreen-400">
+                    <button
+                        onClick={() => navigate('/admin/tasks')}
+                        className="btn-secondary flex items-center justify-center gap-3 group hover:border-evergreen-500/50 hover:bg-evergreen-900/20 hover:text-evergreen-400"
+                    >
                         <span className="text-2xl group-hover:rotate-12 transition-transform">📋</span>
                         <span className="font-semibold tracking-wide">Assign Tasks</span>
                     </button>
-                    <button className="btn-gold flex items-center justify-center gap-3 group">
+                    <button
+                        onClick={() => navigate('/admin/deliveries')}
+                        className="btn-gold flex items-center justify-center gap-3 group"
+                    >
                         <span className="text-2xl group-hover:rotate-12 transition-transform">🚚</span>
                         <span className="font-semibold tracking-wide text-north-pole-950">Track Deliveries</span>
                     </button>
-                    <button className="btn-secondary flex items-center justify-center gap-3 group hover:border-feature-red-500/50 hover:bg-festive-red-900/20 hover:text-festive-red-400">
+                    <button
+                        className="btn-secondary flex items-center justify-center gap-3 group hover:border-feature-red-500/50 hover:bg-festive-red-900/20 hover:text-festive-red-400"
+                    >
                         <span className="text-2xl group-hover:rotate-12 transition-transform">📊</span>
                         <span className="font-semibold tracking-wide">View Reports</span>
                     </button>

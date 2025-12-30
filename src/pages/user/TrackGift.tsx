@@ -101,7 +101,9 @@ const TrackGift = () => {
                         year: 'numeric'
                     })
                     : 'December 25, 2025',
-                status: timeline
+                status: timeline,
+                productionProgress: data.productionProgress || 0,
+                productionStatus: data.productionStatus || 'pending'
             });
         } catch (error) {
             console.error('Tracking error:', error);
@@ -214,7 +216,41 @@ const TrackGift = () => {
                                 </div>
                             </div>
 
-                            {/* Progress Bar */}
+                            {/* Visualization of Production vs Delivery */}
+                            <div className="mb-10 p-6 bg-north-pole-900/50 rounded-2xl border border-white/5">
+                                <h3 className="text-lg font-bold text-stardust-400 mb-4 flex items-center gap-2">
+                                    <span>🏭</span> Toy Factory Status
+                                </h3>
+
+                                {/* Production Progress Bar */}
+                                <div className="mb-2 flex justify-between text-xs text-frost-200/60 uppercase tracking-wide">
+                                    <span>Elves Building</span>
+                                    <span>{(deliveryInfo as any).productionProgress || 0}% Complete</span>
+                                </div>
+                                <div className="h-3 bg-north-pole-800 rounded-full overflow-hidden border border-white/5 relative">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 relative"
+                                        style={{ width: `${(deliveryInfo as any).productionProgress || 0}%` }}
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 animate-shimmer"></div>
+                                    </div>
+                                </div>
+
+                                {(deliveryInfo as any).productionProgress === 100 ? (
+                                    <p className="text-emerald-400 text-xs mt-2 font-bold flex items-center gap-1">
+                                        <span>✅</span> Toy is ready for shipping!
+                                    </p>
+                                ) : (
+                                    <p className="text-frost-200/40 text-xs mt-2 font-mono">
+                                        Elves are hard at work...
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Delivery Progress Bar */}
+                            <h3 className="text-lg font-bold text-stardust-400 mb-4 flex items-center gap-2">
+                                <span>🚚</span> Delivery Status
+                            </h3>
                             <div className="relative pt-4">
                                 <div className="h-4 bg-north-pole-900 rounded-full overflow-hidden border border-white/5">
                                     <div
@@ -231,6 +267,16 @@ const TrackGift = () => {
                                     <span className={deliveryInfo.currentStatus === 'delivered' ? 'text-stardust-400' : ''}>Delivered</span>
                                 </div>
                             </div>
+
+                            {/* Production Status Badge */}
+                            {(deliveryInfo as any).productionStatus === 'completed' && deliveryInfo.currentStatus === 'preparing' && (
+                                <div className="mt-6 flex items-center justify-center animate-bounce-slow">
+                                    <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-6 py-2 rounded-full font-bold flex items-center gap-2">
+                                        <span>🛠️</span>
+                                        <span>Toy Production Complete! Awaiting Sleigh...</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Timeline */}
