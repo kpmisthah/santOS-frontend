@@ -7,16 +7,21 @@ const AdminSidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
 
-  // Default to admin role for now since this is AdminSidebar, 
-  // but in a real app we might check user.role
-  const role = 'admin';
+  const role = user?.role || 'admin';
 
-  const navItems = [
+  const adminNavItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/children', label: 'Children & Wishlists', icon: Users },
     { path: '/admin/tasks', label: 'Task Assignment', icon: ClipboardList },
     { path: '/admin/deliveries', label: 'Delivery Tracking', icon: Truck },
   ];
+
+  const workerNavItems = [
+    { path: '/worker/dashboard', label: 'My Dashboard', icon: LayoutDashboard },
+    { path: '/worker/tasks', label: 'My Tasks', icon: ClipboardList },
+  ];
+
+  const navItems = role === 'admin' ? adminNavItems : workerNavItems;
 
   const handleLogout = () => {
     logout();
@@ -27,7 +32,7 @@ const AdminSidebar = () => {
     <aside className="fixed top-0 left-0 h-full w-64 bg-slate-800/40 backdrop-blur-xl border-r border-slate-700/50 z-50">
       {/* Brand */}
       <div className="p-6 border-b border-slate-700/50">
-        <Link to="/admin/dashboard" className="flex items-center gap-3 group">
+        <Link to={role === 'admin' ? "/admin/dashboard" : "/worker/dashboard"} className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/50 group-hover:scale-110 transition-transform">
             <span className="text-2xl">🎅</span>
           </div>
@@ -35,7 +40,7 @@ const AdminSidebar = () => {
             <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               SantaOS
             </h3>
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Admin Portal</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider">{role === 'admin' ? 'Admin Portal' : 'Worker Portal'}</p>
           </div>
         </Link>
       </div>

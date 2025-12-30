@@ -46,7 +46,7 @@ const Home = () => {
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-sm text-blue-400">
                 <Sparkles className="w-4 h-4" />
-                <span>Powered by AI Analytics</span>
+                <span>Smart Gift Management</span>
               </div>
 
               <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
@@ -60,7 +60,7 @@ const Home = () => {
               </h1>
 
               <p className="text-xl text-slate-400 leading-relaxed max-w-xl">
-                Optimize toy production with real-time analytics. Forecast demand, track wishlists, and ensure every child gets their perfect gift this Christmas.
+                Create your magical wishlist and let Santa know what you'd love this Christmas! Track your gifts every step of the way from the North Pole to your home.
               </p>
 
               <div className="flex gap-4">
@@ -104,9 +104,9 @@ const Home = () => {
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-cyan-900/50">
                   <TrendingUp className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-white">Real-Time Demand Forecasting</h3>
+                <h3 className="text-xl font-bold mb-2 text-white">Smart Wishlist Management</h3>
                 <p className="text-slate-400 text-sm">
-                  AI-powered predictions help optimize production and prevent shortages
+                  Tell Santa exactly what you want! Create your wishlist and Santa will see it right away at the North Pole 🎄
                 </p>
               </div>
 
@@ -156,7 +156,7 @@ const Home = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <Sparkles className="w-4 h-4 text-yellow-400" />
-                <span>AI-Powered</span>
+                <span>Smart System</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <Zap className="w-4 h-4 text-blue-400" />

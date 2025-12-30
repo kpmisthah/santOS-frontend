@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft, Sparkles, ChevronDown, MessageCircle } from 'lucide-react';
 
 interface FAQItem {
     question: string;
@@ -12,11 +13,11 @@ const FAQ = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const categories = [
-        { id: 'all', name: 'All Questions', icon: '📚', color: 'bg-stardust-500/20' },
-        { id: 'wishlist', name: 'Wishlist', icon: '📝', color: 'bg-festive-red-500/20' },
-        { id: 'tracking', name: 'Tracking', icon: '🎁', color: 'bg-evergreen-500/20' },
-        { id: 'delivery', name: 'Delivery', icon: '🚚', color: 'bg-north-pole-500/20' },
-        { id: 'technical', name: 'Technical', icon: '⚙️', color: 'bg-stardust-500/20' }
+        { id: 'all', name: 'All Questions', icon: '📚' },
+        { id: 'wishlist', name: 'Wishlist', icon: '📝' },
+        { id: 'tracking', name: 'Tracking', icon: '🎁' },
+        { id: 'delivery', name: 'Delivery', icon: '🚚' },
+        { id: 'technical', name: 'Technical', icon: '⚙️' }
     ];
 
     const faqs: FAQItem[] = [
@@ -106,94 +107,109 @@ const FAQ = () => {
     };
 
     return (
-        <div className="min-h-screen bg-north-pole-950 text-white py-20 px-6 font-sans">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-20 left-10 w-96 h-96 bg-stardust-500/10 rounded-full blur-[100px]"></div>
-                <div className="absolute bottom-20 right-10 w-96 h-96 bg-festive-red-500/10 rounded-full blur-[100px]"></div>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white overflow-hidden relative">
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
+            <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
 
-            <div className="max-w-5xl mx-auto relative z-10 animate-fade-in">
+            <div className="relative z-10 min-h-screen flex flex-col">
                 {/* Header */}
-                <div className="text-center mb-16">
-                    <Link to="/" className="inline-flex items-center gap-2 text-stardust-400 hover:text-frost-100 transition-colors mb-8 group">
-                        <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                        <span className="font-medium tracking-wide uppercase text-sm">Back to Home</span>
+                <div className="px-8 py-6 backdrop-blur-sm border-b border-white/5">
+                    <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors group">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-medium">Back to Home</span>
                     </Link>
-                    <div className="mb-6">
-                        <span className="text-7xl animate-bounce-slow inline-block drop-shadow-xl">❓</span>
-                    </div>
-                    <h1 className="text-6xl font-display font-bold mb-4 text-gradient-gold drop-shadow-sm">
-                        Frequently Asked Questions
-                    </h1>
-                    <p className="text-xl text-frost-200/60 max-w-2xl mx-auto font-light">
-                        Find answers to common questions about SantaOS and Christmas gift delivery! 🎄
-                    </p>
                 </div>
 
-                {/* Category Filter */}
-                <div className="glass-card p-6 mb-12 border-stardust-500/20">
-                    <div className="flex flex-wrap gap-4 justify-center">
-                        {categories.map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => setActiveCategory(category.id)}
-                                className={`px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-wider transition-all duration-300 transform hover:-translate-y-1 ${activeCategory === category.id
-                                    ? 'bg-gradient-to-r from-stardust-500 to-stardust-600 text-white shadow-neon-gold'
-                                    : 'bg-north-pole-800 text-north-pole-400 hover:bg-north-pole-700 hover:text-frost-100 border border-white/5'
-                                    }`}
-                            >
-                                <span className="mr-2 text-lg">{category.icon}</span>
-                                {category.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* FAQ List */}
-                <div className="space-y-6 mb-16">
-                    {filteredFAQs.map((faq, index) => (
-                        <div
-                            key={index}
-                            className="glass-card overflow-hidden hover:border-stardust-500/30 transition-all group"
-                        >
-                            <button
-                                onClick={() => toggleFAQ(index)}
-                                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
-                            >
-                                <span className="font-display font-bold text-lg text-frost-100 pr-8 group-hover:text-white transition-colors">
-                                    {faq.question}
+                {/* Main Content */}
+                <div className="flex-1 px-4 py-12">
+                    <div className="max-w-4xl mx-auto">
+                        {/* Page Title */}
+                        <div className="text-center mb-12">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-sm text-cyan-400 mb-6">
+                                <Sparkles className="w-4 h-4" />
+                                <span>Get Your Questions Answered</span>
+                            </div>
+                            <h1 className="text-5xl lg:text-6xl font-bold mb-4">
+                                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                    Frequently Asked Questions
                                 </span>
-                                <span className={`text-2xl transition-transform duration-300 flex-shrink-0 text-stardust-400 ${openIndex === index ? 'rotate-180 text-festive-red-400' : ''
-                                    }`}>
-                                    ⬇️
-                                </span>
-                            </button>
+                            </h1>
+                            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+                                Find answers to common questions about SantaOS and Christmas gift delivery! 🎄
+                            </p>
+                        </div>
 
-                            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <div className="px-8 pb-8 text-frost-200/60 leading-relaxed font-light border-t border-white/5 mt-2 pt-6">
-                                    {faq.answer}
-                                </div>
+                        {/* Category Filter */}
+                        <div className="bg-slate-800/40 backdrop-blur-xl rounded-3xl p-6 border border-slate-700/50 shadow-2xl mb-12">
+                            <div className="flex flex-wrap gap-3 justify-center">
+                                {categories.map((category) => (
+                                    <button
+                                        key={category.id}
+                                        onClick={() => setActiveCategory(category.id)}
+                                        className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeCategory === category.id
+                                                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-900/50 scale-105'
+                                                : 'bg-slate-900/50 text-slate-300 hover:bg-slate-900 hover:text-white border border-slate-700/50'
+                                            }`}
+                                    >
+                                        <span className="mr-2">{category.icon}</span>
+                                        {category.name}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    ))}
-                </div>
 
-                {/* Still Have Questions */}
-                <div className="glass-card p-12 text-center bg-gradient-to-br from-north-pole-800/80 to-festive-red-900/20 border-festive-red-500/20">
-                    <div className="text-6xl mb-6 animate-pulse">💬</div>
-                    <h2 className="text-3xl font-display font-bold mb-4 text-gradient-gold">
-                        Still Have Questions?
-                    </h2>
-                    <p className="text-frost-200/60 mb-8 max-w-2xl mx-auto font-light">
-                        Can't find the answer you're looking for? Our friendly support team is here to help!
-                    </p>
-                    <Link
-                        to="/user/contact"
-                        className="btn-primary px-10 py-5 text-xl shadow-glow-sm hover:scale-105 transform inline-block"
-                    >
-                        📧 Contact Support
-                    </Link>
+                        {/* FAQ List */}
+                        <div className="space-y-4 mb-12">
+                            {filteredFAQs.map((faq, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden hover:border-cyan-500/50 transition-all"
+                                >
+                                    <button
+                                        onClick={() => toggleFAQ(index)}
+                                        className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-slate-800/60 transition-colors"
+                                    >
+                                        <span className="font-bold text-lg text-white pr-8">
+                                            {faq.question}
+                                        </span>
+                                        <ChevronDown
+                                            className={`w-6 h-6 text-cyan-400 flex-shrink-0 transition-transform duration-300 ${openIndex === index ? 'rotate-180' : ''
+                                                }`}
+                                        />
+                                    </button>
+
+                                    <div
+                                        className={`overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                                            }`}
+                                    >
+                                        <div className="px-6 pb-6 text-slate-300 leading-relaxed border-t border-slate-700/50 pt-4">
+                                            {faq.answer}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Still Have Questions */}
+                        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-xl rounded-3xl p-10 border border-cyan-500/20 text-center">
+                            <MessageCircle className="w-16 h-16 mx-auto mb-6 text-cyan-400" />
+                            <h2 className="text-3xl font-bold mb-4 text-white">
+                                Still Have Questions?
+                            </h2>
+                            <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
+                                Can't find the answer you're looking for? Our friendly support team is here to help!
+                            </p>
+                            <Link
+                                to="/user/contact"
+                                className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold shadow-lg shadow-cyan-900/50 hover:shadow-xl hover:scale-[1.02] transition-all"
+                            >
+                                <Sparkles className="w-5 h-5" />
+                                <span>Contact Support</span>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
