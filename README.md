@@ -1,17 +1,12 @@
-# 🎅 SantaOS Frontend - The Operating System for Christmas
+# SantaOS Frontend - The Operating System for Christmas
 
 A modern, beautiful web application built with React, TypeScript, Vite, and Tailwind CSS to help Santa manage Christmas operations efficiently. Features a stunning dark theme with glassmorphism, smooth animations, and real-time data updates.
 
-[![React](https://img.shields.io/badge/React-19.2.0-61DAFB.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF.svg)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.19-38B2AC.svg)](https://tailwindcss.com/)
-
 ---
 
-## ✨ Features
+## Features
 
-### 🎅 Admin (Santa) Features
+### Admin (Santa) Features
 - **Dashboard Overview**: Real-time statistics, metrics, and visual analytics
 - **Analytics Charts**: Interactive visualizations for:
   - Top Requested Toys (Bar Chart)
@@ -43,7 +38,7 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
   - Responsive table (desktop) and cards (mobile)
   - Loading states and error handling
 
-### 🧝 Worker (Elf) Features
+### Worker (Elf) Features
 - **Personal Dashboard**: 
   - Real-time task statistics
   - Track your performance and productivity
@@ -57,7 +52,7 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
   - **Update Progress**: Set specific progress % (0-100) and add notes (Persistent & Real-time)
 - **Achievements**: Earn badges for outstanding performance
 
-### 👶 Public Features
+### Public Features
 - **Wishlist Submission**: Children can submit their Christmas wishlists
   - Enter name, age, and location
   - Add multiple gift items with priorities (High/Medium/Low)
@@ -67,8 +62,8 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
   - Beautiful, festive UI with smooth animations
 - **Gift Tracking**: Track delivery status by tracking code
   - Enter tracking code (e.g., `SANTA-ABC12345`)
-  - **🏭 Toy Factory Status**: Real-time production progress (0-100%) from worker updates
-  - **🚚 Delivery Status**: Shipping progress (Preparing → In Transit → Delivered)
+  - ** Toy Factory Status**: Real-time production progress (0-100%) from worker updates
+  - ** Delivery Status**: Shipping progress (Preparing → In Transit → Delivered)
   - View delivery timeline with progress bars
   - Estimated delivery date
   - Separate visualization for production vs shipping stages
@@ -78,7 +73,7 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
 
 ---
 
-## 🚀 Tech Stack
+##  Tech Stack
 
 - **Frontend**: React 19.2.0 + TypeScript 5.9.3
 - **Styling**: Tailwind CSS 3.4.19
@@ -90,7 +85,7 @@ A modern, beautiful web application built with React, TypeScript, Vite, and Tail
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before running the frontend, ensure:
 1. **Backend server** is running on `http://localhost:3000`
@@ -101,7 +96,7 @@ See the [backend README](../backend/README.md) for setup instructions.
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### 1. Clone the Repository
 ```bash
@@ -123,7 +118,7 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 🎨 Design Features
+## Design Features
 
 - **Modern Dark Theme**: Eye-catching dark mode with Christmas colors
 - **Glassmorphism**: Beautiful glass-effect cards and components
@@ -136,7 +131,37 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 🎯 Pages
+## 📸 Screenshots
+
+### Home & Public Pages
+| Home Page | Wishlist Submission |
+|:---:|:---:|
+| ![Home Page](./screenshots/home.png) | ![Wishlist Page](./screenshots/wishlist.png) |
+| *Landing Page* | *Interactive Wishlist Form* |
+
+| Gift Tracking | About Page |
+|:---:|:---:|
+| ![Track Page](./screenshots/track.png) | ![About Page](./screenshots/about.png) |
+| *Real-time Delivery Tracking* | *About SantaOS* |
+
+### Admin Interface (Santa)
+| Admin Dashboard | Children & Wishlists |
+|:---:|:---:|
+| ![Admin Dashboard](./screenshots/admin-dashboard.png) | ![Wishlists](./screenshots/admin-wishlists.png) |
+| *Operational Overview* | *Manage Wishes* |
+
+| Task Assignment | Delivery Management |
+|:---:|:---:|
+| ![Tasks](./screenshots/admin-tasks.png) | ![Deliveries](./screenshots/admin-deliveries.png) |
+| *Assign Tasks to Elves* | *Global Delivery Tracking* |
+
+### Authentication
+![Login Page](./screenshots/login.png)
+*Secure Role-Based Login*
+
+---
+
+## Pages
 
 ### Public Routes
 - `/` - Home page with hero section and Christmas animations
@@ -164,7 +189,7 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 🎨 Color Palette
+## Color Palette
 
 - **Santa Red**: `#C41E3A`
 - **Christmas Green**: `#165B33`
@@ -174,7 +199,7 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 frontend/
@@ -251,25 +276,25 @@ npm run lint
 
 ---
 
-## 🎯 Key Features Explained
+## Key Features Explained
 
 ### Wishlist Submission with Tracking
 1. Child fills out the wishlist form
 2. Backend creates child, wishlist, items, and **delivery record**
 3. Returns a **tracking code** (e.g., `SANTA-ABC12345`)
 4. Frontend displays the code with a **copy button**
-5. Shows a **warning message**: "⚠️ IMPORTANT: Copy this code now!"
-6. Child can copy the code with visual feedback (✅ Copied!)
+5. Shows a **warning message**: " IMPORTANT: Copy this code now!"
+6. Child can copy the code with visual feedback (Copied!)
 
 ### Gift Tracking
 1. Child enters tracking code on the Track page
 2. Frontend extracts delivery ID from code
 3. Calls backend API: `GET /api/deliveries/track/:trackingId`
 4. Displays real-time delivery status:
-   - 🎁 Preparing
-   - 🚀 In Transit
-   - 🎅 Out for Delivery
-   - ✅ Delivered
+   - Preparing
+   - In Transit
+   - Out for Delivery
+   - Delivered
 5. Shows progress bar and timeline with timestamps
 
 ### Nice/Naughty Toggle
@@ -289,7 +314,7 @@ npm run lint
 
 ---
 
-## ⚠️ Known Issues
+##  Known Issues
 
 ### API Configuration
 - **No WebSocket Support**: Real-time updates use polling instead of WebSockets.
@@ -302,42 +327,6 @@ npm run lint
 
 ---
 
-## 🎄 Future Enhancements
-
-### Completed ✅
-- [x] Backend API integration with Node.js
-- [x] Advanced analytics and reporting with Chart.js
-- [x] Authentication and authorization with Zustand
-- [x] Route protection and role-based access
-- [x] Public wishlist submission form
-- [x] Real-time data updates (auto-refresh dashboards)
-- [x] Nice/Naughty status toggle
-- [x] Worker task status updates
-- [x] Tracking code generation and copying
-- [x] Real-time gift tracking
-- [x] **Task assignment with dynamic worker selection**
-- [x] **Delivery tracking with status updates**
-- [x] **Full responsive design (mobile, tablet, desktop)**
-- [x] **Loading states and error handling across all pages**
-
-### In Progress 🚧
-- [ ] Centralized API configuration
-- [ ] Environment-based configuration
-- [ ] Comprehensive error handling
-
-### Planned 📋
-- [ ] WebSocket integration for instant updates
-- [ ] Email notifications for wishlist confirmations
-- [ ] Mobile app version (React Native)
-- [ ] Multi-language support (i18n)
-- [ ] Admin approval workflow for wishlists
-- [ ] Task automation and assignment logic
-- [ ] File upload for gift images
-- [ ] PDF export for reports
-- [ ] Push notifications
-- [ ] Offline mode with service workers
-
----
 
 ## 🧪 Testing
 
@@ -348,7 +337,7 @@ npm run lint
 2. Fill out wishlist form
 3. Submit and receive tracking code
 4. Click "Copy Tracking Code" button
-5. Verify "✅ Copied!" feedback
+5. Verify " Copied!" feedback
 6. Go to `http://localhost:5173/user/track`
 7. Paste tracking code
 8. Verify delivery status displays
@@ -375,7 +364,7 @@ npm run lint
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Build for Production
 ```bash
@@ -407,9 +396,7 @@ npm run build
 # Upload dist/ folder to Netlify
 ```
 
----
-
-## 🐛 Troubleshooting
+-Troubleshooting
 
 ### Port Already in Use
 ```bash
@@ -438,7 +425,7 @@ npm run dev
 
 ---
 
-## 📊 Performance
+## Performance
 
 - **Bundle Size**: Optimized with Vite code splitting
 - **Load Time**: < 2 seconds on average connection
@@ -446,7 +433,7 @@ npm run dev
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Typography
 - **Display Font**: System font stack with fallbacks
@@ -466,7 +453,7 @@ npm run dev
 
 ## 👨‍💻 Author
 
-Built for the SantaOS Christmas Management System with ❤️ and Christmas spirit!
+Built for the SantaOS Christmas Management System with and Christmas spirit!
 
 ---
 
@@ -485,7 +472,3 @@ For issues or questions:
 4. Verify backend is running and accessible
 
 ---
-
-**Made with 🎅 by the SantaOS Team**
-
-**Happy Holidays! 🎄✨**
