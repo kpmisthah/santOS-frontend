@@ -41,6 +41,13 @@ const Wishlist = () => {
     const [location, setLocation] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(trackingCode);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -73,9 +80,10 @@ const Wishlist = () => {
                     throw new Error('Failed to send wishlist to Santa');
                 }
 
-                // Generate a tracking code
-                const code = `SANTA-${Date.now().toString(36).toUpperCase()}`;
-                setTrackingCode(code);
+                const data = await response.json();
+
+                // Use the tracking code from backend
+                setTrackingCode(data.trackingCode || `SANTA-${Date.now().toString(36).toUpperCase()}`);
                 setSubmitted(true);
 
                 // Reset form optionally or just show success screen (current behavior)
@@ -124,13 +132,31 @@ const Wishlist = () => {
 
                     <div className="glass-card p-10 mb-8 border-stardust-400/30">
                         <p className="text-frost-200/60 mb-4 uppercase tracking-wider text-sm font-bold">Your tracking code:</p>
-                        <div className="bg-gradient-to-r from-festive-red-500 via-stardust-500 to-evergreen-500 p-1 rounded-2xl mb-6 shadow-glow">
+                        <div className="bg-gradient-to-r from-festive-red-500 via-stardust-500 to-evergreen-500 p-1 rounded-2xl mb-4 shadow-glow">
                             <div className="bg-north-pole-900 rounded-2xl px-8 py-6">
                                 <p className="text-4xl font-mono font-bold text-gradient-gold tracking-wider">
                                     {trackingCode}
                                 </p>
                             </div>
                         </div>
+
+                        <button
+                            onClick={copyToClipboard}
+                            className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 mb-4 ${copied
+                                    ? 'bg-evergreen-500 text-white shadow-glow'
+                                    : 'bg-gradient-to-r from-stardust-500 to-stardust-600 text-white hover:shadow-neon-gold'
+                                }`}
+                        >
+                            {copied ? '✅ Copied!' : '📋 Copy Tracking Code'}
+                        </button>
+
+                        <div className="bg-festive-red-500/10 border border-festive-red-500/30 rounded-xl p-4 mb-4">
+                            <p className="text-festive-red-200 text-sm font-bold flex items-center gap-2">
+                                <span className="text-2xl">⚠️</span>
+                                <span>IMPORTANT: Copy this code now! You'll need it to track your gifts.</span>
+                            </p>
+                        </div>
+
                         <p className="text-frost-200/60 text-sm font-light">
                             Save this code to track your gifts! You can also check your email for confirmation.
                         </p>
